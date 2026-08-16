@@ -1,0 +1,23 @@
+# 《存道》（齐国大航海）配置实例
+# 使用：npx @deepseek-ai/dsh web --patch <本文件绝对路径>
+# 注意：name 字段必须是 novel-harness 插件入口的绝对路径，按需修改
+- insert:
+    - id: novel-harness
+      name: '/path/to/novel-harness/src/index.ts'
+      config:
+        root: '/path/to/齐国大航海/v2'
+        files:
+          bible: '../v1/00_设定圣经.md'
+          master: '存道-四部总成稿.md'
+          outline: '存道-千章卷纲.md'
+          methodology: '存道-网文写作方法论.md'
+          bridges: '存道-亮点桥段设计.md'
+        chaptersDir: '正文'
+        primaryVariant: 'cc 版'
+        variants: ['cc 版', 'ds 版', 'gemini 版']
+        nearChapters: 5
+        coachMode: false
+        # 战国架空背景的补充词表按需追加，例如：
+        # anachronismLexicon: ['报纸', '大学']
+        # 成语类误报豁免，例如：
+        # anachronismWhitelist: ['纸上谈兵', '纸老虎']
