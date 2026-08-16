@@ -11,6 +11,7 @@
           outline: '存道-千章卷纲.md'
           methodology: '存道-网文写作方法论.md'
           bridges: '存道-亮点桥段设计.md'
+          preference: '存道-作者偏好档案.md'
         chaptersDir: '正文'
         finalVariant: '定稿'
         variants: ['cc 版', 'ds 版', 'gemini 版']

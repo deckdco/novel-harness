@@ -89,6 +89,7 @@ export function makeProject(chapterOverrides: Record<number, { body?: string, fr
       outline: 'outline.md',
       methodology: 'methodology.md',
       bridges: 'bridges.md',
+      preference: '作者偏好档案.md',
     },
     chaptersDir: '正文',
     finalVariant: '定稿',

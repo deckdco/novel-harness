@@ -8,6 +8,7 @@ import { chaptersTool } from '../src/tools/chapters.ts'
 import { checkTool } from '../src/tools/check.ts'
 import { compareVersionsTool } from '../src/tools/compare.ts'
 import { coachTool } from '../src/tools/coach.ts'
+import { feedbackTool } from '../src/tools/feedback.ts'
 import { bibleQueryTool } from '../src/tools/bible-query.ts'
 import type { ProjectConfig } from '../src/config.ts'
 import { Project } from '../src/lib/project.ts'
@@ -20,6 +21,7 @@ const config: ProjectConfig = {
     outline: '存道-千章卷纲.md',
     methodology: '存道-网文写作方法论.md',
     bridges: '存道-亮点桥段设计.md',
+    preference: '存道-作者偏好档案.md',
   },
   chaptersDir: '正文',
   finalVariant: '定稿',
@@ -50,6 +52,7 @@ const chapters = chaptersTool(project)
 const check = checkTool(project)
 const compare = compareVersionsTool(project)
 const coach = coachTool(project)
+const feedback = feedbackTool(project)
 
 await run('bible_query 苏秦', () => bible.execute({ query: '苏秦' }, {} as never))
 await run('bible_query 逼空', () => bible.execute({ query: '逼空' }, {} as never))
@@ -60,4 +63,5 @@ await run('chapters list cc 版（草稿竞技场）', () => chapters.execute({ 
 await run('chapters progress 定稿', () => chapters.execute({ action: 'progress' }, {} as never))
 await run('check 1,2,3 cc 版草稿（显式 variant）', () => check.execute({ chapters: '1,2,3', variant: 'cc 版' }, {} as never))
 await run('compare 第1章 三版草稿+定稿状态', () => compare.execute({ chapter: 1 }, {} as never))
+await run('feedback digest（尚无定稿溯源，应为空+建档提示）', () => feedback.execute({ action: 'digest' }, {} as never))
 await run('coach（coachMode 关闭应报错）', () => coach.execute({ mode: 'critique', chapter: 1 }, {} as never))

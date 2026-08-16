@@ -1,17 +1,20 @@
 /**
  * novel-harness — DeepSeek Harness 长篇小说写作辅助插件
  *
- * 6 个工具：
+ * 7 个工具：
  *   novel_bible_query      设定语料检索
  *   novel_chapter_brief    本章任务卡（上下文引擎核心）
  *   novel_chapters         章节规范化管理 create/save/finalize/list/progress
  *   novel_check            检查器套件（钩子/时代错漏/节奏/黄金三章/工具人）
  *   novel_compare_versions 同章竞写选稿工作台（草稿并排+定稿状态）
+ *   novel_feedback         偏好反馈循环（定稿vs草稿差异证据→喂三方初稿）
  *   novel_coach            教练模式（coachMode 开关）
  *
- * 工作流核心约定——定稿中心制：
+ * 工作流核心约定——定稿中心制 + 偏好反馈循环：
  *   cc/ds/gemini 等变体是当章竞写草稿的竞技场，不定稿不算数；
  *   定稿文件夹是唯一正典，前情提要/检查器/进度默认只读定稿；
+ *   定稿对草稿的修改是作者偏好证据，经 digest/distill 沉淀进偏好档案，
+ *   任务卡自动携带、反馈包可粘贴给任一初稿生成方——初稿越写越合口味；
  *   卷纲是活文档，随定稿人工修订，插件按 mtime 自动重载。
  *
  * 设计哲学："给地图不给说明书"——工具提供确定性上下文与检查，
@@ -27,6 +30,7 @@ import { chaptersTool } from './tools/chapters.ts'
 import { checkTool } from './tools/check.ts'
 import { coachTool } from './tools/coach.ts'
 import { compareVersionsTool } from './tools/compare.ts'
+import { feedbackTool } from './tools/feedback.ts'
 
 export const name = 'novel-harness'
 export const inject = ['tools']
@@ -40,5 +44,6 @@ export function apply(ctx: Context, config: ProjectConfig): void {
   ctx.tools.register(chaptersTool(project))
   ctx.tools.register(checkTool(project))
   ctx.tools.register(compareVersionsTool(project))
+  ctx.tools.register(feedbackTool(project))
   ctx.tools.register(coachTool(project))
 }

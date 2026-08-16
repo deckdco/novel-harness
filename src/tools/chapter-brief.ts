@@ -36,6 +36,10 @@ export function chapterBriefTool(project: Project) {
       const hookTemplates = project.methodologySection('3.1')
       const recap = buildRecap(project, chapter, project.config.nearChapters)
 
+      // 作者偏好档案（定稿反馈循环的沉淀）：任务卡自动携带，初稿遵守
+      const preferenceRaw = project.readOptional(project.config.files.preference)
+      const preference = preferenceRaw ? preferenceRaw.trim() : null
+
       // 前情提要基准 = 定稿文件夹（唯一正典）；前章未定稿时给出缺口警告
       const finalizedChapters = project.chapters(project.finalVariant).map(c => c.chapter)
       const lastFinalized = finalizedChapters.length > 0 ? Math.max(...finalizedChapters) : 0
@@ -67,6 +71,12 @@ export function chapterBriefTool(project: Project) {
           lastFinalized,
           note: '前情提要只读定稿文件夹——竞写草稿不算已发生剧情',
           gapWarning,
+        },
+        preference: {
+          content: preference ? preference.slice(0, 1800) : null,
+          note: preference
+            ? '作者偏好档案（来自定稿反馈循环）：初稿必须遵守；与卷纲冲突时提请作者裁决'
+            : '尚无作者偏好档案——定稿几章后运行 novel_feedback digest 归纳偏好并 distill 建档，初稿契合度会随循环提升',
         },
         disciplines: {
           writing: discipline ? discipline.content.slice(0, 2000) : null,

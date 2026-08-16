@@ -14,6 +14,8 @@ export interface ProjectConfig {
     outline: string
     methodology: string
     bridges: string
+    /** 作者偏好档案：定稿反馈循环的沉淀物，任务卡自动携带。 */
+    preference: string
   }
   chaptersDir: string
   /** 定稿文件夹：唯一正典。前情提要/检查器/进度默认只读它。 */
@@ -34,6 +36,7 @@ export const Config: z<ProjectConfig> = z.object({
     outline: z.string().description('卷纲路径'),
     methodology: z.string().description('写作方法论文档路径'),
     bridges: z.string().description('亮点桥段库路径'),
+    preference: z.string().default('作者偏好档案.md').description('作者偏好档案路径（定稿反馈循环的沉淀物；文件可后建）'),
   }),
   chaptersDir: z.string().default('正文'),
   finalVariant: z.string().default('定稿').description('定稿文件夹名（chaptersDir 下）：唯一正典，前情提要/检查器/进度默认只读定稿'),

@@ -133,7 +133,7 @@ export function chaptersTool(project: Project) {
           from: args.from ?? '(content 直接给定)',
           replacedExisting: Boolean(existingFinal),
           wordcount: merged.wordcount,
-          note: `已归档进定稿文件夹「${final}」。前情提要/检查器/进度自此刻起只认这份；如卷纲需要随之修订，直接编辑卷纲文件即可（插件按 mtime 自动重载）。`,
+          note: `已归档进定稿文件夹「${final}」。前情提要/检查器/进度自此刻起只认这份；如卷纲需要随之修订，直接编辑卷纲文件即可（插件按 mtime 自动重载）。${args.from ? ' 你对草稿的修改是偏好证据——建议运行 novel_feedback digest 生成反馈包给三方初稿生成方，并把归纳出的规则 novel_feedback distill 进偏好档案。' : ''}`,
         }
       }
 
