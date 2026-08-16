@@ -9,7 +9,7 @@
  * 签名变化自动重载，避免读到过期内容。
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
-import { isAbsolute, join } from 'node:path'
+import { basename, isAbsolute, join } from 'node:path'
 import type { ProjectConfig } from '../config.ts'
 import type { FrontmatterValue } from './frontmatter.ts'
 import { splitFrontmatter } from './frontmatter.ts'
@@ -129,7 +129,7 @@ export class Project {
 
     const chapters = entries
       .map(({ path }) => {
-        const info = parseChapterFileName(path.split('/').pop()!)
+        const info = parseChapterFileName(basename(path))
         if (!info) return null
         const raw = readFileSync(path, 'utf8')
         const parsed = splitFrontmatter(raw)
