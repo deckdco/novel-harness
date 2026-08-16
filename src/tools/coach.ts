@@ -31,8 +31,8 @@ export function coachTool(project: Project) {
 
       if (args.mode === 'critique') {
         if (!args.chapter) return { error: 'critique 需要 chapter' }
-        const file = project.findChapter(project.primaryVariant, args.chapter)
-        if (!file) return { error: `第${args.chapter}章在 ${project.primaryVariant} 下不存在` }
+        const file = project.findChapter(project.finalVariant, args.chapter)
+        if (!file) return { error: `第${args.chapter}章在 ${project.finalVariant} 下不存在` }
         const volume = project.volumeForChapter(args.chapter)
         return {
           mode: 'critique',

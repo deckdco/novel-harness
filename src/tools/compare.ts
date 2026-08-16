@@ -1,4 +1,4 @@
-/** novel_compare_versions：多模型同章竞写对比。 */
+/** novel_compare_versions：竞写选稿工作台——草稿并排 + 定稿状态。 */
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { JsonValue } from '@deepseek-ai/dsh-tools'
 import { countChineseChars, type ChapterFile, type Project } from '../lib/project.ts'
@@ -33,7 +33,7 @@ export function compareVersionsTool(project: Project) {
   return defineTool({
     name: 'novel_compare_versions',
     description:
-      '同章多模型竞写对比：各变体的字数/状态/钩子/开头/结尾并排呈现。用于 cc/ds/gemini 等版本选优，或检查单一版本是否偏离卷纲。',
+      '同章竞写选稿工作台：cc/ds/gemini 等草稿变体的字数/状态/钩子/开头/结尾并排对比，并显示该章定稿状态（选中的稿用 novel_chapters finalize 归档）。也用于检查单一草稿是否偏离卷纲。',
     parameters: {
       chapter: { type: 'number', required: true, description: '章号' },
     },
@@ -46,18 +46,24 @@ export function compareVersionsTool(project: Project) {
         const volume = project.volumeForChapter(args.chapter)
         return volume?.chapterBeats.find(b => b.chapter === args.chapter) ?? null
       })()
+      const finalFile = project.findChapter(project.finalVariant, args.chapter)
+      const drafts = project.config.variants
+        .filter(v => v !== project.config.finalVariant)
+        .map(variant => variantStats(project.findChapter(variant, args.chapter), variant))
       return {
         chapter: args.chapter,
         outlineBeat: beat,
-        variants: project.config.variants.map(variant =>
-          variantStats(project.findChapter(variant, args.chapter), variant),
-        ),
+        drafts,
+        final: finalFile
+          ? { ...variantStats(finalFile, project.finalVariant), finalized: true }
+          : { variant: project.finalVariant, exists: false, finalized: false },
         selectionCriteria: [
           '开头 300 字是否更快进入场景',
           '章尾钩子强度与类型（对照卷纲 beat 要求）',
           '现代概念是否内化转译（无穿越词/无术语直出）',
           '对话是否有信息差张力（§五）',
           '与卷纲节拍的完成度',
+          '受启发想融合多稿时：以最优稿为底，用 finalize 的 content 参数提交融合改写稿',
         ],
       }
     },

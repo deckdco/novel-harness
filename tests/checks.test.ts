@@ -8,7 +8,7 @@ let fixture: Fixture | null = null
 
 function context(): CheckContext {
   const f = fixture ?? (fixture = makeProject())
-  return { project: f.project, chapters: f.project.chapters('cc 版') }
+  return { project: f.project, chapters: f.project.chapters('定稿') }
 }
 
 afterEach(() => {
@@ -53,12 +53,12 @@ describe('hooks-coverage', () => {
 
   it('有 hooks 标注的章节不报', () => {
     const f = makeProject()
-    const path = f.project.chapters('cc 版')[0].path
+    const path = f.project.chapters('定稿')[0].path
     const raw = readFileSync(path, 'utf8')
     writeFileSync(path, raw.replace('volume: 1', 'volume: 1\nhooks: [信息钩-测试]'))
     f.project.invalidateChapters()
     fixture = f
-    const report = checkHooksCoverage({ project: f.project, chapters: f.project.chapters('cc 版') })
+    const report = checkHooksCoverage({ project: f.project, chapters: f.project.chapters('定稿') })
     expect(report.findings.filter(m => m.level === 'error')).toHaveLength(0)
   })
 })
@@ -80,7 +80,7 @@ describe('golden3', () => {
 
   it('不含1–3章时跳过', () => {
     const f = makeProject()
-    const chapters = f.project.chapters('cc 版').slice(0, 0)
+    const chapters = f.project.chapters('定稿').slice(0, 0)
     fixture = f
     const report = checkGolden3({ project: f.project, chapters })
     expect(report.findings[0].message).toContain('跳过')

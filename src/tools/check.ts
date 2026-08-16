@@ -13,14 +13,14 @@ export function checkTool(project: Project) {
     parameters: {
       chapters: { type: 'string', required: true, description: '章号列表，逗号分隔，如 "1,2,3" 或 "4"' },
       checks: { type: 'string', description: `要跑的检查器，逗号分隔；默认全部（${CHECKER_NAMES.join(',')}）` },
-      variant: { type: 'string', description: '变体目录名，默认主变体' },
+      variant: { type: 'string', description: '变体目录名，默认定稿文件夹（唯一正典）；检查某份竞写草稿时显式传入' },
     },
     output: {
       schema: { type: 'json' },
       render: (_args, value) => [{ type: 'text', text: JSON.stringify(value, null, 2) }],
     },
     async execute(args): Promise<JsonValue> {
-      const variant = args.variant ?? project.config.primaryVariant
+      const variant = args.variant ?? project.config.finalVariant
       const numbers = args.chapters.split(/[,,]/).map(s => Number.parseInt(s.trim(), 10)).filter(n => Number.isInteger(n) && n > 0)
       if (numbers.length === 0) return { error: `无法解析章号列表: ${args.chapters}` }
 

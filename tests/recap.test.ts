@@ -36,4 +36,12 @@ describe('buildRecap', () => {
     expect(recap.near).toHaveLength(0)
     expect(recap.far).toHaveLength(0)
   })
+
+  it('前情提要只读定稿：cc 版草稿不算已发生剧情', () => {
+    const f = makeProject() // cc 版有第4章草稿，定稿只有 1–3
+    fixture = f
+    const recap = buildRecap(f.project, 5, 5)
+    expect(recap.near.map(n => n.chapter)).toEqual([1, 2, 3])
+    expect(JSON.stringify(recap)).not.toContain('cc 版草稿正文')
+  })
 })

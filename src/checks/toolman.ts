@@ -10,7 +10,7 @@ export function checkToolman(ctx: CheckContext): CheckReport {
     prompts: [],
   }
 
-  const series = ctx.project.chapters(ctx.project.primaryVariant)
+  const series = ctx.project.chapters(ctx.project.finalVariant)
   const appearance = new Map<string, number[]>()
   for (const c of series) {
     const roles = Array.isArray(c.data.roles) ? c.data.roles : []

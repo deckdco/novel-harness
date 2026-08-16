@@ -1,5 +1,6 @@
 /**
  * 真实数据端到端验证：直接调用 6 个工具的 execute 逻辑（不经模型）。
+ * 全部只读操作，不向真实项目写入任何文件。
  * 运行：node --experimental-strip-types --no-warnings scripts/validate-real.ts
  */
 import { chapterBriefTool } from '../src/tools/chapter-brief.ts'
@@ -21,7 +22,7 @@ const config: ProjectConfig = {
     bridges: '存道-亮点桥段设计.md',
   },
   chaptersDir: '正文',
-  primaryVariant: 'cc 版',
+  finalVariant: '定稿',
   variants: ['cc 版', 'ds 版', 'gemini 版'],
   nearChapters: 5,
   coachMode: false,
@@ -52,10 +53,11 @@ const coach = coachTool(project)
 
 await run('bible_query 苏秦', () => bible.execute({ query: '苏秦' }, {} as never))
 await run('bible_query 逼空', () => bible.execute({ query: '逼空' }, {} as never))
-await run('chapter_brief 第4章（下一章）', () => chapterBrief.execute({ chapter: 4 }, {} as never))
+await run('chapter_brief 第4章（下一章，含定稿缺口警告）', () => chapterBrief.execute({ chapter: 4 }, {} as never))
 await run('chapter_brief 第500章（跨部远章）', () => chapterBrief.execute({ chapter: 500 }, {} as never))
-await run('chapters list cc 版', () => chapters.execute({ action: 'list' }, {} as never))
-await run('chapters progress', () => chapters.execute({ action: 'progress' }, {} as never))
-await run('check 1,2,3 全检查器', () => check.execute({ chapters: '1,2,3' }, {} as never))
-await run('compare 第1章 三版', () => compare.execute({ chapter: 1 }, {} as never))
+await run('chapters list 定稿（唯一正典）', () => chapters.execute({ action: 'list' }, {} as never))
+await run('chapters list cc 版（草稿竞技场）', () => chapters.execute({ action: 'list', variant: 'cc 版' }, {} as never))
+await run('chapters progress 定稿', () => chapters.execute({ action: 'progress' }, {} as never))
+await run('check 1,2,3 cc 版草稿（显式 variant）', () => check.execute({ chapters: '1,2,3', variant: 'cc 版' }, {} as never))
+await run('compare 第1章 三版草稿+定稿状态', () => compare.execute({ chapter: 1 }, {} as never))
 await run('coach（coachMode 关闭应报错）', () => coach.execute({ mode: 'critique', chapter: 1 }, {} as never))

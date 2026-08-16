@@ -16,7 +16,9 @@ export interface ProjectConfig {
     bridges: string
   }
   chaptersDir: string
-  primaryVariant: string
+  /** 定稿文件夹：唯一正典。前情提要/检查器/进度默认只读它。 */
+  finalVariant: string
+  /** 竞写草稿变体（cc/ds/gemini 等）：当章竞技场，不定稿不算数。 */
   variants: string[]
   nearChapters: number
   coachMode: boolean
@@ -34,8 +36,8 @@ export const Config: z<ProjectConfig> = z.object({
     bridges: z.string().description('亮点桥段库路径'),
   }),
   chaptersDir: z.string().default('正文'),
-  primaryVariant: z.string().default('cc 版').description('正文主变体目录名'),
-  variants: z.array(String).default(['cc 版']).description('全部竞写变体目录名'),
+  finalVariant: z.string().default('定稿').description('定稿文件夹名（chaptersDir 下）：唯一正典，前情提要/检查器/进度默认只读定稿'),
+  variants: z.array(String).default(['cc 版', 'ds 版', 'gemini 版']).description('竞写草稿变体目录名（不含定稿），供 compare 并排与 save 指定'),
   nearChapters: z.number().default(5).description('前情提要的近章详摘窗口'),
   coachMode: z.boolean().default(false).description('教练模式：严格不代笔，拒绝生成类请求'),
   anachronismLexicon: z.array(String).default([]).description('追加的时代错漏词表'),

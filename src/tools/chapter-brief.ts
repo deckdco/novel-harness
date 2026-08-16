@@ -36,6 +36,13 @@ export function chapterBriefTool(project: Project) {
       const hookTemplates = project.methodologySection('3.1')
       const recap = buildRecap(project, chapter, project.config.nearChapters)
 
+      // 前情提要基准 = 定稿文件夹（唯一正典）；前章未定稿时给出缺口警告
+      const finalizedChapters = project.chapters(project.finalVariant).map(c => c.chapter)
+      const lastFinalized = finalizedChapters.length > 0 ? Math.max(...finalizedChapters) : 0
+      const gapWarning = lastFinalized < chapter - 1
+        ? `定稿截至第${lastFinalized}章：第${lastFinalized + 1}–${chapter - 1}章尚未定稿，前情提要不含这些章的草稿内容。若已竞写完毕，请先用 novel_chapters finalize 归档，再动笔本章。`
+        : ''
+
       return {
         chapter,
         volume: {
@@ -55,6 +62,12 @@ export function chapterBriefTool(project: Project) {
         chapterBeat: beat,
         bridgeScenes: scenes,
         recap,
+        recapBasis: {
+          variant: project.finalVariant,
+          lastFinalized,
+          note: '前情提要只读定稿文件夹——竞写草稿不算已发生剧情',
+          gapWarning,
+        },
         disciplines: {
           writing: discipline ? discipline.content.slice(0, 2000) : null,
           hookTemplates: hookTemplates ? hookTemplates.content.slice(0, 1500) : null,

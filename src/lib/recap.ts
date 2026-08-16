@@ -1,6 +1,7 @@
 /**
  * 前情提要塔：千章长篇的上下文管理。
  *
+ * 只读定稿文件夹（唯一正典）——竞写草稿不算已发生剧情。
  * 近章（默认前 5 章）：frontmatter summary 详摘 + 钩子记录。
  * 远章：按卷粗摘——每卷已写章数 + 各章一句话串联，超出预算时截断。
  */
@@ -37,7 +38,7 @@ function fallbackSummary(chapter: ChapterFile): string {
 
 export function buildRecap(project: Project, uptoChapter: number, nearCount: number): Recap {
   const written = project
-    .chapters(project.primaryVariant)
+    .chapters(project.finalVariant)
     .filter(c => c.chapter < uptoChapter && c.chapter > 0)
   const nearChapters = written.slice(-nearCount)
   const nearChapterNumbers = new Set(nearChapters.map(c => c.chapter))

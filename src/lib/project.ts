@@ -1,10 +1,14 @@
 /**
  * 项目映射：把配置解析成可操作的文件视图。
  *
- * 负责：路径解析、卷纲解析缓存、变体章节扫描（兼容三种历史命名）、
- * 亮点桥段库的卷内场景提取、方法论章节提取、语料检索。
+ * 核心约定：finalVariant（定稿文件夹）是唯一正典——前情提要、检查器、
+ * 进度统计默认只读定稿；variants（cc/ds/gemini）只是当章竞写草稿。
+ *
+ * 卷纲是活文档（随定稿人工修订），用 mtime 失效缓存；
+ * 草稿章节由外部工具随时写入，章节缓存用「路径+mtime 签名」校验，
+ * 签名变化自动重载，避免读到过期内容。
  */
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { isAbsolute, join } from 'node:path'
 import type { ProjectConfig } from '../config.ts'
 import type { FrontmatterValue } from './frontmatter.ts'
@@ -39,15 +43,16 @@ export function countChineseChars(text: string): number {
 
 export class Project {
   readonly config: ProjectConfig
-  private outlineCache: Outline | null = null
-  private chaptersCache = new Map<string, ChapterFile[]>()
+  private outlineCache: { outline: Outline, mtimeMs: number } | null = null
+  private chaptersCache = new Map<string, { signature: string, chapters: ChapterFile[] }>()
 
   constructor(config: ProjectConfig) {
     this.config = config
   }
 
-  get primaryVariant(): string {
-    return this.config.primaryVariant
+  /** 定稿文件夹名：唯一正典。 */
+  get finalVariant(): string {
+    return this.config.finalVariant
   }
 
   resolve(p: string): string {
@@ -65,11 +70,14 @@ export class Project {
     return readFileSync(abs, 'utf8')
   }
 
+  /** 卷纲（活文档）：文件 mtime 变化即重新解析。 */
   get outline(): Outline {
-    if (!this.outlineCache) {
-      this.outlineCache = parseOutline(this.readRequired(this.config.files.outline))
+    const abs = this.resolve(this.config.files.outline)
+    const mtimeMs = statSync(abs).mtimeMs
+    if (!this.outlineCache || this.outlineCache.mtimeMs !== mtimeMs) {
+      this.outlineCache = { outline: parseOutline(readFileSync(abs, 'utf8')), mtimeMs }
     }
-    return this.outlineCache
+    return this.outlineCache.outline
   }
 
   volumeForChapter(chapter: number): VolumeOutline | null {
@@ -99,23 +107,28 @@ export class Project {
     return findSection(splitSections(raw), headingKeyword)
   }
 
-  /** 某变体下全部章节（递归扫描，兼容历史命名），按章号排序。 */
+  /** 某变体下全部章节（递归扫描，兼容历史命名），按章号排序。
+   *  缓存以「文件路径+mtime」签名校验——草稿由外部工具写入也能及时感知。 */
   chapters(variant: string): ChapterFile[] {
-    const cached = this.chaptersCache.get(variant)
-    if (cached) return cached
     const dir = join(this.config.root, this.config.chaptersDir, variant)
-    const files: string[] = []
+    const entries: Array<{ path: string, mtimeMs: number }> = []
     const walk = (d: string, depth: number): void => {
       if (!existsSync(d) || depth > 3) return
       for (const entry of readdirSync(d, { withFileTypes: true })) {
         const full = join(d, entry.name)
         if (entry.isDirectory()) walk(full, depth + 1)
-        else if (entry.isFile() && entry.name.endsWith('.md')) files.push(full)
+        else if (entry.isFile() && entry.name.endsWith('.md')) {
+          entries.push({ path: full, mtimeMs: statSync(full).mtimeMs })
+        }
       }
     }
     walk(dir, 0)
-    const chapters = files
-      .map(path => {
+    const signature = entries.map(e => `${e.path}:${e.mtimeMs}`).join('|')
+    const cached = this.chaptersCache.get(variant)
+    if (cached && cached.signature === signature) return cached.chapters
+
+    const chapters = entries
+      .map(({ path }) => {
         const info = parseChapterFileName(path.split('/').pop()!)
         if (!info) return null
         const raw = readFileSync(path, 'utf8')
@@ -132,7 +145,7 @@ export class Project {
       })
       .filter((c): c is ChapterFile => c !== null)
       .sort((a, b) => a.chapter - b.chapter)
-    this.chaptersCache.set(variant, chapters)
+    this.chaptersCache.set(variant, { signature, chapters })
     return chapters
   }
 

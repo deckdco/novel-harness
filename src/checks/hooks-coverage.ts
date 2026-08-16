@@ -11,7 +11,7 @@ export function checkHooksCoverage(ctx: CheckContext): CheckReport {
     prompts: [],
   }
 
-  const series = ctx.project.chapters(ctx.project.primaryVariant)
+  const series = ctx.project.chapters(ctx.project.finalVariant)
   const checked = new Set(ctx.chapters.map(c => c.chapter))
   const streak: number[] = []
   for (const c of series) {
