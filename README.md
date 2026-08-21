@@ -1,5 +1,7 @@
 # novel-harness
 
+[MIT License](LICENSE)
+
 基于 [DeepSeek Harness（dsh）](https://github.com/deepseek-ai/deepseek-harness) 的长篇小说写作辅助插件：**上下文引擎 + 竞写选稿工作台 + 章节规范化管理 + 检查器套件**。
 
 设计哲学是 harness engineering 的"给地图不给说明书"——插件不提供代笔工具，而是把正确的上下文（任务卡/前情提要/纪律约束）喂给模型，再用确定性检查器验证产出。千章长篇的上下文不可能全量塞进会话，本插件用"近章详摘 + 远章按卷粗摘"的前情提要塔解决。
@@ -37,6 +39,7 @@
 ```sh
 cd novel-harness
 npm install                      # 首次
+cp cordis.example.yml cordis.yml # 复制模板，改两个路径：name=插件入口绝对路径，root=你的小说项目根目录
 npx @deepseek-ai/dsh web --patch ./cordis.yml
 # 打开 http://127.0.0.1:3080，配置模型 API key 后即可对话
 ```
@@ -112,7 +115,7 @@ npx @deepseek-ai/dsh web --patch ./cordis.yml
 ```sh
 npm test                 # vitest，63 个用例
 npx tsc --noEmit         # 类型检查
-node --experimental-strip-types --no-warnings scripts/validate-real.ts   # 真实数据端到端验证（只读）
+node --experimental-strip-types --no-warnings scripts/validate-real.ts   # 真实数据端到端验证（只读；先把脚本内 root 改为你本机的小说项目路径）
 ```
 
 注意事项（踩过的坑）：

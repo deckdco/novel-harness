@@ -15,7 +15,7 @@ import type { ProjectConfig } from '../src/config.ts'
 import { Project } from '../src/lib/project.ts'
 
 const config: ProjectConfig = {
-  root: '/path/to/齐国大航海/v2',
+  root: 'D:/path/to/齐国大航海/v2',  // ← 改为你本机小说项目根目录
   files: {
     bible: '../v1/00_设定圣经.md',
     master: '齐国大航海-v3架构总纲（海洋结局·爽文版）.md',

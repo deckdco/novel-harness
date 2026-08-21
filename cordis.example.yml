@@ -1,0 +1,24 @@
+# novel-harness 加载配置模板
+# 使用：复制为 cordis.yml，把两个路径改成你本机的实际路径后启动：
+#   cp cordis.example.yml cordis.yml
+#   npx @deepseek-ai/dsh web --patch ./cordis.yml
+# 注意：name 字段必须是 novel-harness 插件入口的绝对路径；root 是你的小说项目根目录
+- insert:
+    - id: novel-harness
+      name: '/path/to/novel-harness/src/index.ts'
+      config:
+        root: '/path/to/novel-project/v2'
+        files:
+          bible: '../v1/00_设定圣经.md'
+          master: '存道-四部总成稿.md'
+          outline: '存道-千章卷纲.md'
+          methodology: '存道-网文写作方法论.md'
+          bridges: '存道-亮点桥段设计.md'
+          preference: '存道-作者偏好档案.md'  # 偏好反馈循环沉淀（可后建，distill 自动创建）
+        chaptersDir: '正文'
+        finalVariant: '定稿'
+        variants: ['zcode 版', 'cc 版', 'ds 版', 'gemini 版']  # 竞写草稿变体（不含定稿），按需增删
+        nearChapters: 5
+        coachMode: false
+        anachronismLexicon: []
+        anachronismWhitelist: []
