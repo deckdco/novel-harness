@@ -15,7 +15,7 @@
           preference: '存道-作者偏好档案.md'   # 定稿反馈循环沉淀；文件可后建
         chaptersDir: '正文'
         finalVariant: '定稿'
-        variants: ['cc 版', 'ds 版', 'gemini 版']
+        variants: ['zcode 版', 'cc 版', 'ds 版', 'gemini 版']
         nearChapters: 5
         coachMode: false
         # 战国架空背景的补充词表按需追加，例如：

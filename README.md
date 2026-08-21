@@ -4,16 +4,17 @@
 
 设计哲学是 harness engineering 的"给地图不给说明书"——插件不提供代笔工具，而是把正确的上下文（任务卡/前情提要/纪律约束）喂给模型，再用确定性检查器验证产出。千章长篇的上下文不可能全量塞进会话，本插件用"近章详摘 + 远章按卷粗摘"的前情提要塔解决。
 
-## 工作流核心约定：定稿中心制 + 偏好反馈循环
+## 工作流核心约定：定稿中心制 + 盲审把关 + 偏好反馈循环
 
-本插件围绕"三方竞写、人工定稿、反馈学习"的真实工作流构建：
+本插件围绕"四方竞写、Opus 盲审、人工定稿、反馈学习"的真实工作流构建：
 
-1. **每章三方竞写**：Claude Code(glm-5.2) / DeepSeek / Gemini 各写一版，落进 `cc 版 / ds 版 / gemini 版` 草稿文件夹——它们只是**当章竞技场**，不是三套平行正文
-2. **人工选稿**：用 `novel_compare_versions` 并排对比；可直接选定，也可受启发重新生成再选；融合多稿时以最优稿为底改写
-3. **定稿归档**：用 `novel_chapters finalize` 把选中的稿（或融合改写稿）归档进定稿文件夹
-4. **上下文只认定稿**：前情提要塔、检查器、进度统计**默认只读定稿文件夹**——未定稿的草稿不算已发生剧情
-5. **偏好反馈循环**：定稿对草稿的修改是作者偏好证据——`novel_feedback digest` 生成反馈包喂给三方初稿生成方（ds/gemini 直接粘贴，cc 走任务卡），归纳出的规则 `distill` 进偏好档案，此后每章任务卡自动携带——初稿越写越合口味
-6. **卷纲随定稿演化**：卷纲是活文档，根据定稿内容人工修订；插件按文件 mtime 自动重载，长会话不会读到旧卷纲
+1. **每章四方竞写**：ZCode(glm-5.3) / Claude Code(glm-5.2) / Gemini / DeepSeek 各写一版，落进 `zcode 版 / cc 版 / gemini 版 / ds 版` 草稿文件夹——它们只是**当章竞技场**，不是四套平行正文。纪律：四方拿**同一份任务卡逐字开写**，初稿阶段互相不见面（竞写的价值在异质性，互看则同质化）。DeepSeek 无 API，走网页版人工搬运：任务卡全文贴入网页版，产出文本落进 `ds 版`（外部写入靠 mtime 签名自动感知）
+2. **Opus 盲审**：四版齐后由 claude-opus-4-6-thinking 审查，**去模型署名、只给甲/乙/丙/丁编号**，审查标准携带 novel_check 方法论（节奏五问/黄金三章六问/工具人三问/钩子覆盖红线），按 severity 出结论——调度方（ZCode）兼运动员，盲审消除整合偏向；Opus 只审不写，稀缺配额用在批判性品味上
+3. **人工选稿**：用 `novel_compare_versions` 并排对比 + 盲审意见；可直接选定，也可受启发重新生成再选；融合多稿时以最优稿为底改写
+4. **定稿归档**：用 `novel_chapters finalize` 把选中的稿（或融合改写稿）归档进定稿文件夹
+5. **上下文只认定稿**：前情提要塔、检查器、进度统计**默认只读定稿文件夹**——未定稿的草稿不算已发生剧情
+6. **偏好反馈循环**：定稿对草稿的修改是作者偏好证据——`novel_feedback digest` 生成反馈包（ds/gemini 粘贴到网页版，cc/zcode 走任务卡），归纳出的规则 `distill` 进偏好档案，此后每章任务卡自动携带——初稿越写越合口味
+7. **卷纲随定稿演化**：卷纲是活文档，根据定稿内容人工修订；插件按文件 mtime 自动重载，长会话不会读到旧卷纲
 
 ## 七个工具
 
@@ -23,7 +24,7 @@
 | `novel_chapter_brief` | **核心**。本章任务卡：所在卷细纲、本章节拍、亮点桥段、前情提要塔（只读定稿）、作者偏好档案、写作纪律与钩子模板；前章未定稿时给出缺口警告 |
 | `novel_chapters` | 章节管理 `create / save / finalize / list / progress`：统一命名（第NNN章_章名.md）、frontmatter 自动维护；**finalize = 草稿→定稿归档**（唯一正典写入动作） |
 | `novel_check` | 5 个检查器：钩子覆盖（连续3章无钩红线）、时代错漏词表、节奏统计+五问、黄金三章六问、工具人三问。默认查定稿，也可显式传 variant 查某份草稿 |
-| `novel_compare_versions` | 竞写选稿工作台：cc/ds/gemini 草稿并排（字数/钩子/开头/结尾）+ 该章定稿状态 + 选优标准 |
+| `novel_compare_versions` | 竞写选稿工作台：四路草稿（按 variants 配置）并排（字数/钩子/开头/结尾）+ 该章定稿状态 + 选优标准 |
 | `novel_feedback` | **偏好反馈循环**。digest=定稿vs草稿的段落级差异证据→可粘贴反馈包；distill=偏好规则写入作者偏好档案 |
 | `novel_coach` | 教练模式（`coachMode: true` 开启）：证据式讲评 / 苏格拉底提问，不代笔 |
 
@@ -40,16 +41,17 @@ npx @deepseek-ai/dsh web --patch ./cordis.yml
 # 打开 http://127.0.0.1:3080，配置模型 API key 后即可对话
 ```
 
-每章完整流程（三方竞写工作流）：
+每章完整流程（四方竞写工作流）：
 
 ```
 ① novel_chapter_brief 拿第N章任务卡（前情提要只读定稿；有缺口警告先补定稿）
-② 三方各写一版（本会话直接写 / 其他工具写完放进草稿文件夹均可，外部写入靠 mtime 签名自动感知）
-③ novel_compare_versions 并排对比 → 选定或受启发重写
-④ novel_chapters finalize 归档进定稿（content 参数可提交融合改写稿；建议给 summary/hooks——前情提要塔依赖）
-⑤ novel_feedback digest 生成偏好反馈包 → 粘贴给 ds/gemini，本会话模型直接读；
+② 四方竞写各一版：ZCode 本会话直接写；cc/gemini 由调度方甩同一份任务卡；ds 网页版人工搬运落盘
+③ 四版齐 → Opus 盲审（甲乙丙丁编号 + novel_check 方法论，按 severity 出结论）
+④ novel_compare_versions 并排对比 + 盲审意见 → 选定或受启发重写
+⑤ novel_chapters finalize 归档进定稿（content 参数可提交融合改写稿；建议给 summary/hooks——前情提要塔依赖）
+⑥ novel_feedback digest 生成偏好反馈包 → 粘贴给 ds/gemini 网页版，cc/zcode 走任务卡；
    归纳出 3–8 条偏好规则后 novel_feedback distill 存档（此后任务卡自动携带）
-⑥ novel_check 查定稿 → 修订（save）→ 视需要修订卷纲（直接编辑文件，自动重载）
+⑦ novel_check 查定稿 → 修订（save）→ 视需要修订卷纲（直接编辑文件，自动重载）
 ```
 
 ## 配置说明（cordis.yml 的 config 节）
@@ -69,7 +71,7 @@ npx @deepseek-ai/dsh web --patch ./cordis.yml
           preference: '存道-作者偏好档案.md'  # 偏好反馈循环沉淀（可后建，distill 自动创建）
         chaptersDir: '正文'
         finalVariant: '定稿'            # 定稿文件夹：唯一正典，recap/检查器/进度默认只读它
-        variants: ['cc 版', 'ds 版', 'gemini 版']  # 竞写草稿变体（不含定稿）
+          variants: ['zcode 版', 'cc 版', 'ds 版', 'gemini 版']  # 竞写草稿变体（不含定稿）
         nearChapters: 5                 # 前情提要近章窗口
         coachMode: false                # true = 教练不代笔模式
         anachronismLexicon: []          # 追加时代错漏词
